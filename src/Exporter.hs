@@ -30,7 +30,6 @@ toKey text = F.formatKey F.text text
 fixup :: T.Text -> T.Text
 fixup = T.replace "," "_" . T.replace " " "_"
 
-
 toDeltas :: H.Transaction -> M.Map I.Key Double
 toDeltas txn =
     let postings = concatMap explodeAccount (H.tpostings txn)
