@@ -30,6 +30,7 @@ library
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:    base ^>=4.18.1.0
+                    , dotenv
                     , hledger-lib
                     , influxdb
                     , containers
@@ -48,6 +49,7 @@ executable hledger-influxdb-exporter
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:    base ^>=4.18.1.0
+                    , dotenv
                     , hledger-influxdb-exporter
                     , hledger-lib
                     , http-client-tls

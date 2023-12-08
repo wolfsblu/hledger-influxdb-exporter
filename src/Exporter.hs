@@ -2,9 +2,7 @@
 
 module Exporter (toMeasurements) where
 
-import Debug.Trace
 import Data.Function (on)
-import Data.Text.Encoding (encodeUtf8)
 import Data.List (inits, groupBy, mapAccumL, nub)
 import qualified Data.Map as M
 import Data.String (fromString)
@@ -53,4 +51,4 @@ value :: H.MixedAmount -> Double
 value (H.Mixed amounts) = sum (map go (M.elems amounts)) where
   go (H.Amount "\915\233\188" q _ _) = fromRational (toRational q)
   go (H.Amount _ _ _ (Just (H.TotalPrice a))) = go a
-  go (H.Amount _ _ _ _) = 0
+  go (H.Amount {}) = 0

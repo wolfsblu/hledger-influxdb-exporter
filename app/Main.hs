@@ -2,21 +2,31 @@
 
 module Main where
 
-import Control.Lens
-import Database.InfluxDB as I
-import Database.InfluxDB.Types as I
-import Hledger.Data.Types as H
-import Hledger.Read as H
-import Network.HTTP.Client.TLS (tlsManagerSettings)
+import Configuration.Dotenv (loadFile, defaultConfig, onMissingFile)
+import Control.Lens ( (&), (.~) )
+import Data.Text (pack)
+import Database.InfluxDB (writeBatch, writeParams)
 import Exporter (toMeasurements)
+import Hledger.Data.Types (jtxns)
+import Hledger.Read (defaultJournal)
+import Network.HTTP.Client.TLS (tlsManagerSettings)
+import System.Environment.Blank (getEnvDefault, getEnvironment)
+import qualified Database.InfluxDB.Types as I
 
 main :: IO ()
 main = do
-  journal <- H.defaultJournal
-  let measurements = toMeasurements (H.jtxns journal)
-  let db = "finance"
-  let server = I.Server "localhost" 443 True
-  let p = I.writeParams db & I.server .~ server
-                           & I.manager .~ Left tlsManagerSettings
-  I.writeBatch p measurements
+  onMissingFile (loadFile defaultConfig) (putStrLn "No .env file found, using defaults")
+  dbName <- getEnvDefault "INFLUXDB_NAME" "finance"
+  host <- getEnvDefault "INFLUXDB_HOST" "localhost"
+  port <- getEnvDefault "INFLUXDB_PORT" "8086"
+  ssl <- getEnvDefault "INFLUXDB_USE_SSL" "False"
+
+  journal <- defaultJournal
+  let measurements = toMeasurements (jtxns journal)
+  let db = I.Database (pack dbName)
+  let server = I.Server (pack host) (read port :: Int) (read ssl :: Bool)
+  let params = writeParams db & I.server .~ server
+                              & I.manager .~ Left tlsManagerSettings
+
+  writeBatch params measurements
   putStrLn $ "Wrote " ++ show (length measurements) ++ " measurements."
